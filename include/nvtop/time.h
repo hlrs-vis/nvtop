@@ -30,12 +30,18 @@
 #else
 #define NVTOP_CLOCK CLOCK_MONOTONIC
 #endif
-
+#ifdef WIN32
+#include <Windows.h>
+#define CLOCK_MONOTONIC 1
+//struct timespec { long tv_sec; long tv_nsec; };    //header part
+extern int clock_gettime(int unusedInt, struct timespec* spec);
+#endif
 typedef struct timespec nvtop_time;
 #ifdef __GNUC__
 inline void nvtop_get_current_time(nvtop_time *time)  __attribute__ ((always_inline));
 #endif
 inline void nvtop_get_current_time(nvtop_time *time) {
+
   clock_gettime(NVTOP_CLOCK, time);
 }
 
@@ -57,26 +63,29 @@ inline double nvtop_difftime(nvtop_time t0, nvtop_time t1) {
 
 inline nvtop_time nvtop_hmns_to_time(unsigned hour, unsigned minutes,
                                      unsigned long nanosec) {
-  nvtop_time t = {hour * 60 * 60 + 60 * minutes + nanosec / 1000000,
-                  nanosec % 1000000};
+  nvtop_time t = {(long)(hour * 60 * 60 + 60 * minutes + nanosec / 1000000,
+                  nanosec % 1000000)};
   return t;
 }
 
 inline nvtop_time nvtop_substract_time(nvtop_time t0, nvtop_time t1) {
-  nvtop_time t =
+	  long lv = 
       t0.tv_nsec - t1.tv_nsec < 0
-          ? (nvtop_time){t0.tv_sec - t1.tv_sec - 1,
-                         t0.tv_nsec - t1.tv_nsec + 1000000}
-          : (nvtop_time){t0.tv_sec - t1.tv_sec, t0.tv_nsec - t1.tv_nsec};
+          ? (t0.tv_sec - t1.tv_sec - 1,
+                         t0.tv_nsec - t1.tv_nsec + 1000000)
+          : (t0.tv_sec - t1.tv_sec, t0.tv_nsec - t1.tv_nsec);
+
+	  nvtop_time t = { lv };
   return t;
 }
 
 inline nvtop_time nvtop_add_time(nvtop_time t0, nvtop_time t1) {
-  nvtop_time t =
+	long lv =
       t0.tv_nsec + t1.tv_nsec > 1000000
-          ? (nvtop_time){t0.tv_sec + t1.tv_sec + 1,
-                         t0.tv_nsec + t1.tv_nsec - 1000000}
-          : (nvtop_time){t0.tv_sec + t1.tv_sec, t0.tv_nsec + t1.tv_nsec};
+          ? (t0.tv_sec + t1.tv_sec + 1,
+                         t0.tv_nsec + t1.tv_nsec - 1000000)
+          : (t0.tv_sec + t1.tv_sec, t0.tv_nsec + t1.tv_nsec);
+		  nvtop_time t = { lv };
   return t;
 }
 

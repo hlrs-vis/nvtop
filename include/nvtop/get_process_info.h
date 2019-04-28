@@ -34,11 +34,15 @@ struct process_cpu_usage {
   size_t resident_memory;   // Bytes
   nvtop_time time;
 };
+#ifdef WIN32
+#include <windows.h>
+typedef DWORD pid_t;
+#endif
+void get_username_from_pid(pid_t pid, char** buffer);
 
-void get_username_from_pid(pid_t pid, char **buffer);
+void get_command_from_pid(pid_t pid, char** buffer);
 
-void get_command_from_pid(pid_t pid, char **buffer);
+bool get_process_info(pid_t pid, struct process_cpu_usage* usage);
 
-bool get_process_info(pid_t pid, struct process_cpu_usage *usage);
 
 #endif // GET_PROCESS_INFO_H_

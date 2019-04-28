@@ -481,7 +481,7 @@ unsigned int initialize_device_info(struct device_info **dev_info,
   unsigned int num_queriable = 0;
   for (unsigned int i = 0; i < num_devices; ++i) {
     retval = nvmlDeviceGetHandleByIndex(i, &devs[num_queriable].device_handle);
-    if (i < CHAR_BIT * sizeof(gpu_mask) && (gpu_mask & (1 << i)) == 0)
+    if (i < CHAR_BIT * sizeof(gpu_mask) && (gpu_mask & ((int64_t)1 << i)) == 0)
       continue;
     if (retval != NVML_SUCCESS) {
       if (retval == NVML_ERROR_NO_PERMISSION) {
